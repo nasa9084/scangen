@@ -8,7 +8,6 @@ import (
 	"go/build"
 	"go/parser"
 	"go/token"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -56,23 +55,25 @@ func exec() int {
 	} else {
 		filenames = args
 	}
-	var out io.Writer
-	if *output == "" {
-		out = os.Stdout
-	} else {
-		var err error
-		f, err := os.OpenFile(*output, os.O_RDWR|os.O_CREATE, 0666)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer f.Close()
-		out = f
-	}
+	out := getOutput(*output)
+	defer out.Close()
 	if err := g.parse(filenames); err != nil {
 		log.Fatal(err)
 	}
 	g.buf.WriteTo(out)
 	return 0
+}
+
+func getOutput(output string) *os.File {
+	if output == "" {
+		return os.Stdout
+	}
+	var err error
+	f, err := os.OpenFile(output, os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return f
 }
 
 func isDirectory(name string) bool {
