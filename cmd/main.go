@@ -46,8 +46,9 @@ func exec() int {
 	if len(args) == 0 {
 		args = []string{"."}
 	}
-	g := generator{}
-	g.targetTypes = strings.Split(*typesstr, ",")
+	g := generator{
+		targetTypes: strings.Split(*typesstr, ","),
+	}
 	var filenames []string
 	if len(args) == 1 && isDirectory(args[0]) {
 		g.dir = args[0]
@@ -55,12 +56,13 @@ func exec() int {
 	} else {
 		filenames = args
 	}
-	out := getOutput(*output)
-	defer out.Close()
 	if err := g.parse(filenames); err != nil {
 		log.Fatal(err)
 	}
+	out := getOutput(*output)
+	defer out.Close()
 	g.buf.WriteTo(out)
+
 	return 0
 }
 
