@@ -127,14 +127,7 @@ func (g *generator) parse() error {
 		var structMap map[string]*ast.StructType
 
 		for _, decl := range parsedFile.Decls {
-			genDecl, ok := decl.(*ast.GenDecl)
-			if !ok {
-				continue
-			}
-			if genDecl.Tok != token.TYPE {
-				continue
-			}
-			structMap = mergemap(structMap, g.extractStruct(genDecl.Specs))
+			structMap = mergemap(structMap, g.extractStruct(decl))
 		}
 		if err := g.generate(structMap); err != nil {
 			log.Fatal(err)
@@ -144,9 +137,16 @@ func (g *generator) parse() error {
 	return nil
 }
 
-func (g *generator) extractStruct(specs []ast.Spec) map[string]*ast.StructType {
+func (g *generator) extractStruct(decl ast.Decl) map[string]*ast.StructType {
+	genDecl, ok := decl.(*ast.GenDecl)
+	if !ok {
+		return nil
+	}
+	if genDecl.Tok != token.TYPE {
+		return nil
+	}
 	structMap := map[string]*ast.StructType{}
-	for _, spec := range specs {
+	for _, spec := range genDecl.Specs {
 		typeSpec, ok := spec.(*ast.TypeSpec)
 		if !ok {
 			continue
