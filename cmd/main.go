@@ -56,7 +56,7 @@ func exec() int {
 	} else {
 		g.filenames = args
 	}
-	out := io.Writer{}
+	var out io.Writer
 	if *output == "" {
 		out = os.Stdout
 	} else {
