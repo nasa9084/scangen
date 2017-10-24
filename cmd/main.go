@@ -31,7 +31,6 @@ type generator struct {
 	dir         string
 	targetTypes []string
 	packageName string
-	filenames   []string
 	astFiles    []*ast.File
 }
 
@@ -50,11 +49,12 @@ func exec() int {
 	}
 	g := generator{}
 	g.targetTypes = strings.Split(*typesstr, ",")
+	var filenames []string
 	if len(args) == 1 && isDirectory(args[0]) {
 		g.dir = args[0]
-		g.packageName, g.filenames = parseDir(args[0])
+		g.packageName, filenames = parseDir(args[0])
 	} else {
-		g.filenames = args
+		filenames = args
 	}
 	var out io.Writer
 	if *output == "" {
@@ -68,7 +68,7 @@ func exec() int {
 		defer f.Close()
 		out = f
 	}
-	if err := g.parse(); err != nil {
+	if err := g.parse(filenames); err != nil {
 		log.Fatal(err)
 	}
 	g.buf.WriteTo(out)
@@ -115,10 +115,10 @@ func parseDir(dir string) (string, []string) {
 	return p.Name, p.GoFiles
 }
 
-func (g *generator) parse() error {
+func (g *generator) parse(filenames []string) error {
 	fs := token.NewFileSet()
 	astFiles := []*ast.File{}
-	for _, name := range g.filenames {
+	for _, name := range filenames {
 		parsedFile, err := parser.ParseFile(fs, filepath.Join(g.dir, name), nil, 0)
 		if err != nil {
 			log.Fatal(err)
