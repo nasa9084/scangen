@@ -33,7 +33,6 @@ type generator struct {
 	packageName string
 	filenames   []string
 	astFiles    []*ast.File
-	output      io.Writer
 }
 
 func main() { os.Exit(exec()) }
@@ -57,8 +56,9 @@ func exec() int {
 	} else {
 		g.filenames = args
 	}
+	out := io.Writer{}
 	if *output == "" {
-		g.output = os.Stdout
+		out = os.Stdout
 	} else {
 		var err error
 		f, err := os.OpenFile(*output, os.O_RDWR|os.O_CREATE, 0666)
@@ -66,12 +66,12 @@ func exec() int {
 			log.Fatal(err)
 		}
 		defer f.Close()
-		g.output = f
+		out = f
 	}
 	if err := g.parse(); err != nil {
 		log.Fatal(err)
 	}
-	g.buf.WriteTo(g.output)
+	g.buf.WriteTo(out)
 	return 0
 }
 
