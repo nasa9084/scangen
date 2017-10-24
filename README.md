@@ -23,3 +23,7 @@ func (someStruct *SomeStruct) Scan(sc interface{
     return sc.Scan(&someStruct.Name, &someStruct.Age)
 }
 ```
+
+## KNOWN ISSUE
+
+* when given a filename to arguments, package will be empty
