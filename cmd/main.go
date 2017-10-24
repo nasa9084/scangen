@@ -186,12 +186,10 @@ func (g *generator) generate(structMap map[string]*ast.StructType) error {
 	g.Printf("package %s\n\n", g.packageName)
 	g.Printf("import \"database/sql\"\n\n")
 	for name, st := range structMap {
-		vn := variablize(name)
-		fs := getFields(st)
-		g.Printf("func (%s *%s) Scan(sc interface{\n", vn, name)
+		g.Printf("func (%s *%s) Scan(sc interface{\n", variablize(name), name)
 		g.Printf("\tScan func(...interface{}) error\n")
 		g.Printf("}) error {\n")
-		g.Printf("\treturn sc.Scan(%s)\n", strings.Join(fs, ", "))
+		g.Printf("\treturn sc.Scan(%s)\n", strings.Join(getFields(st), ", "))
 		g.Printf("}\n\n")
 	}
 	return nil
